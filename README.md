@@ -5,9 +5,13 @@ The generated azure.yaml can be used to deploy project by [azd](https://github.c
 
 ## Build binary executable
 
-todo
+```shell
+go build
+```
 
 ## Executable binary executable
 
-todo
+```shell
+./ajpa
+```
 
