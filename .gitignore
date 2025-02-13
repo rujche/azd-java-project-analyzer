@@ -1,0 +1,51 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Output path for local repoman generation
+/.output
+
+# Test binary, built with `go test -c`
+*.test
+
+/bin
+/.envrc
+
+# GoLand temp files
+.idea 
+
+# go code coverage outputs
+# text format
+*.out
+# binary formats
+covcounters.*
+covmeta.*
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Python temporary files
+[.]venv/
+*.py[co]
+__pycache__/
+
+.env
+.azure
+/cli/azd/bin
+/cli/azd/pkg/oneauth/bridge/_build
+*env/
+obj/
+bin/
+node_modules/
+test-results/
+
+# terraform .tfstate files
+**/.terraform
+*.tfstate*
+*.terraform*
+
+# Finder state files
+.DS_Store
