@@ -1,14 +1,14 @@
 package analyzer
 
 type ProjectAnalysisResult struct {
-	resources                       []Resource
-	resourceToResourceUsageBindings []ResourceToResourceUsageBinding
-	projectToResourceMappings       []ProjectToResourceMapping
+	Resources                       []Resource
+	ResourceToResourceUsageBindings []ResourceToResourceUsageBinding
+	ProjectToResourceMappings       []ProjectToResourceMapping
 }
 
 type Resource struct {
-	resourceName string
-	resourceType ResourceType
+	ResourceName string
+	ResourceType ResourceType
 }
 
 type ResourceType string
@@ -27,21 +27,21 @@ const (
 )
 
 type ResourceToResourceUsageBinding struct {
-	sourceResourceName string
-	targetResourceName string
+	SourceResourceName string
+	TargetResourceName string
 }
 
 type ProjectToResourceMapping struct {
-	projectRelativePath string
-	resourceName        string
+	ProjectRelativePath string
+	ResourceName        string
 }
 
 func mergeProject(result1 ProjectAnalysisResult, result2 ProjectAnalysisResult) ProjectAnalysisResult {
 	// todo: handle duplicated error
 	return ProjectAnalysisResult{
-		resources: append(result1.resources, result2.resources...),
-		resourceToResourceUsageBindings: append(result1.resourceToResourceUsageBindings,
-			result2.resourceToResourceUsageBindings...),
-		projectToResourceMappings: append(result1.projectToResourceMappings, result2.projectToResourceMappings...),
+		Resources: append(result1.Resources, result2.Resources...),
+		ResourceToResourceUsageBindings: append(result1.ResourceToResourceUsageBindings,
+			result2.ResourceToResourceUsageBindings...),
+		ProjectToResourceMappings: append(result1.ProjectToResourceMappings, result2.ProjectToResourceMappings...),
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func analyzeJavaProject(projectRootPath string) (ProjectAnalysisResult, error) {
+func AnalyzeJavaProject(projectRootPath string) (ProjectAnalysisResult, error) {
 	return analyzeJavaProjectSubDirectory(projectRootPath, projectRootPath)
 }
 
@@ -59,8 +59,8 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	result := ProjectAnalysisResult{}
 	projectPath := filepath.Dir(pomRelativePathPath)
 	containerAppName := LabelName(filepath.Base(projectPath))
-	result.resources = append(result.resources, Resource{containerAppName, AzureContainerApp})
-	result.projectToResourceMappings = append(result.projectToResourceMappings,
+	result.Resources = append(result.Resources, Resource{containerAppName, AzureContainerApp})
+	result.ProjectToResourceMappings = append(result.ProjectToResourceMappings,
 		ProjectToResourceMapping{projectPath, containerAppName})
 	for _, dep := range pom.Dependencies {
 		if dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j" {
@@ -69,14 +69,14 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 			// 2. Support multiple container app use one mysql
 			// 3. Same to other resources like postgresql
 			mysqlResourceName := "mysql"
-			result.resources = append(result.resources, Resource{mysqlResourceName, AzureDatabaseForMysql})
-			result.resourceToResourceUsageBindings = append(result.resourceToResourceUsageBindings,
+			result.Resources = append(result.Resources, Resource{mysqlResourceName, AzureDatabaseForMysql})
+			result.ResourceToResourceUsageBindings = append(result.ResourceToResourceUsageBindings,
 				ResourceToResourceUsageBinding{containerAppName, mysqlResourceName})
 		}
 		if dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql" {
 			postgresqlResourceName := "postgresql"
-			result.resources = append(result.resources, Resource{postgresqlResourceName, AzureDatabaseForPostgresql})
-			result.resourceToResourceUsageBindings = append(result.resourceToResourceUsageBindings,
+			result.Resources = append(result.Resources, Resource{postgresqlResourceName, AzureDatabaseForPostgresql})
+			result.ResourceToResourceUsageBindings = append(result.ResourceToResourceUsageBindings,
 				ResourceToResourceUsageBinding{containerAppName, postgresqlResourceName})
 		}
 		// todo: support other resource types.

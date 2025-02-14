@@ -22,34 +22,34 @@ func TestAnalyzeJavaProject(t *testing.T) {
 			name:             "java-multiple-modules",
 			workingDirectory: filepath.Join("testdata", "java-multiple-modules"),
 			expected: ProjectAnalysisResult{
-				resources: []Resource{
+				Resources: []Resource{
 					{
-						resourceName: "application",
-						resourceType: AzureContainerApp,
+						ResourceName: "application",
+						ResourceType: AzureContainerApp,
 					},
 					{
-						resourceName: "mysql",
-						resourceType: AzureDatabaseForMysql,
+						ResourceName: "mysql",
+						ResourceType: AzureDatabaseForMysql,
 					},
 					{
-						resourceName: "postgresql",
-						resourceType: AzureDatabaseForPostgresql,
-					},
-				},
-				resourceToResourceUsageBindings: []ResourceToResourceUsageBinding{
-					{
-						sourceResourceName: "application",
-						targetResourceName: "mysql",
-					},
-					{
-						sourceResourceName: "application",
-						targetResourceName: "postgresql",
+						ResourceName: "postgresql",
+						ResourceType: AzureDatabaseForPostgresql,
 					},
 				},
-				projectToResourceMappings: []ProjectToResourceMapping{
+				ResourceToResourceUsageBindings: []ResourceToResourceUsageBinding{
 					{
-						projectRelativePath: "application",
-						resourceName:        "application",
+						SourceResourceName: "application",
+						TargetResourceName: "mysql",
+					},
+					{
+						SourceResourceName: "application",
+						TargetResourceName: "postgresql",
+					},
+				},
+				ProjectToResourceMappings: []ProjectToResourceMapping{
+					{
+						ProjectRelativePath: "application",
+						ResourceName:        "application",
 					},
 				},
 			},
@@ -59,7 +59,7 @@ func TestAnalyzeJavaProject(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			project, err := analyzeJavaProject(tt.workingDirectory)
+			project, err := AnalyzeJavaProject(tt.workingDirectory)
 			if err != nil {
 				t.Fatalf("analyzePomProject failed: %v", err)
 			}
@@ -147,34 +147,34 @@ func TestAnalyzePomProject(t *testing.T) {
 				},
 			},
 			expected: ProjectAnalysisResult{
-				resources: []Resource{
+				Resources: []Resource{
 					{
-						resourceName: "app-one",
-						resourceType: AzureContainerApp,
+						ResourceName: "app-one",
+						ResourceType: AzureContainerApp,
 					},
 					{
-						resourceName: "mysql",
-						resourceType: AzureDatabaseForMysql,
+						ResourceName: "mysql",
+						ResourceType: AzureDatabaseForMysql,
 					},
 					{
-						resourceName: "postgresql",
-						resourceType: AzureDatabaseForPostgresql,
-					},
-				},
-				resourceToResourceUsageBindings: []ResourceToResourceUsageBinding{
-					{
-						sourceResourceName: "app-one",
-						targetResourceName: "mysql",
-					},
-					{
-						sourceResourceName: "app-one",
-						targetResourceName: "postgresql",
+						ResourceName: "postgresql",
+						ResourceType: AzureDatabaseForPostgresql,
 					},
 				},
-				projectToResourceMappings: []ProjectToResourceMapping{
+				ResourceToResourceUsageBindings: []ResourceToResourceUsageBinding{
 					{
-						projectRelativePath: "app-one",
-						resourceName:        "app-one",
+						SourceResourceName: "app-one",
+						TargetResourceName: "mysql",
+					},
+					{
+						SourceResourceName: "app-one",
+						TargetResourceName: "postgresql",
+					},
+				},
+				ProjectToResourceMappings: []ProjectToResourceMapping{
+					{
+						ProjectRelativePath: "app-one",
+						ResourceName:        "app-one",
 					},
 				},
 			},
