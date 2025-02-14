@@ -22,34 +22,21 @@ func TestAnalyzeJavaProject(t *testing.T) {
 			name:             "java-multiple-modules",
 			workingDirectory: filepath.Join("testdata", "java-multiple-modules"),
 			expected: ProjectAnalysisResult{
-				Resources: []Resource{
-					{
-						ResourceName: "application",
-						ResourceType: AzureContainerApp,
-					},
-					{
-						ResourceName: "mysql",
-						ResourceType: AzureDatabaseForMysql,
-					},
-					{
-						ResourceName: "postgresql",
-						ResourceType: AzureDatabaseForPostgresql,
-					},
+				Applications: map[string]Application{
+					"application": {"application"},
 				},
-				ResourceToResourceUsageBindings: []ResourceToResourceUsageBinding{
-					{
-						SourceResourceName: "application",
-						TargetResourceName: "mysql",
-					},
-					{
-						SourceResourceName: "application",
-						TargetResourceName: "postgresql",
-					},
+				Services: map[string]Service{
+					"application":                AzureContainerApp{},
+					DefaultMysqlServiceName:      AzureDatabaseForMysql{},
+					DefaultPostgresqlServiceName: AzureDatabaseForPostgresql{},
 				},
-				ProjectToResourceMappings: []ProjectToResourceMapping{
-					{
-						ProjectRelativePath: "application",
-						ResourceName:        "application",
+				ApplicationToHostingService: map[string]string{
+					"application": "application",
+				},
+				ApplicationToBackingService: map[string]map[string]interface{}{
+					"application": {
+						DefaultMysqlServiceName:      "",
+						DefaultPostgresqlServiceName: "",
 					},
 				},
 			},
@@ -110,7 +97,7 @@ func TestAnalyzePomProject(t *testing.T) {
 			name: "has mysql and postgresql dependency",
 			testPoms: []testPom{
 				{
-					pomFileRelativePath: filepath.Join("app-one", "pom.xml"),
+					pomFileRelativePath: filepath.Join("application", "pom.xml"),
 					pomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
@@ -147,34 +134,21 @@ func TestAnalyzePomProject(t *testing.T) {
 				},
 			},
 			expected: ProjectAnalysisResult{
-				Resources: []Resource{
-					{
-						ResourceName: "app-one",
-						ResourceType: AzureContainerApp,
-					},
-					{
-						ResourceName: "mysql",
-						ResourceType: AzureDatabaseForMysql,
-					},
-					{
-						ResourceName: "postgresql",
-						ResourceType: AzureDatabaseForPostgresql,
-					},
+				Applications: map[string]Application{
+					"application": {"application"},
 				},
-				ResourceToResourceUsageBindings: []ResourceToResourceUsageBinding{
-					{
-						SourceResourceName: "app-one",
-						TargetResourceName: "mysql",
-					},
-					{
-						SourceResourceName: "app-one",
-						TargetResourceName: "postgresql",
-					},
+				Services: map[string]Service{
+					"application":                AzureContainerApp{},
+					DefaultMysqlServiceName:      AzureDatabaseForMysql{},
+					DefaultPostgresqlServiceName: AzureDatabaseForPostgresql{},
 				},
-				ProjectToResourceMappings: []ProjectToResourceMapping{
-					{
-						ProjectRelativePath: "app-one",
-						ResourceName:        "app-one",
+				ApplicationToHostingService: map[string]string{
+					"application": "application",
+				},
+				ApplicationToBackingService: map[string]map[string]interface{}{
+					"application": {
+						DefaultMysqlServiceName:      "",
+						DefaultPostgresqlServiceName: "",
 					},
 				},
 			},

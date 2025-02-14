@@ -24,7 +24,10 @@ func analyzeJavaProjectSubDirectory(projectRootPath string, subDirectoryPath str
 			if err != nil {
 				return ProjectAnalysisResult{}, fmt.Errorf("analyzing java project: %w", err)
 			}
-			result = mergeProject(result, newResult)
+			result, err = mergeProjectAnalysisResult(result, newResult)
+			if err != nil {
+				return ProjectAnalysisResult{}, err
+			}
 		} else {
 			// todo:
 			// 1. Support file names like backend-pom.xml
@@ -36,7 +39,10 @@ func analyzeJavaProjectSubDirectory(projectRootPath string, subDirectoryPath str
 					return ProjectAnalysisResult{}, err
 				}
 				// todo: consider multiple pom use same Azure resource
-				result = mergeProject(result, newResult)
+				result, err = mergeProjectAnalysisResult(result, newResult)
+				if err != nil {
+					return ProjectAnalysisResult{}, err
+				}
 			}
 		}
 	}
@@ -57,27 +63,38 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 		return ProjectAnalysisResult{}, nil
 	}
 	result := ProjectAnalysisResult{}
-	projectPath := filepath.Dir(pomRelativePathPath)
-	containerAppName := LabelName(filepath.Base(projectPath))
-	result.Resources = append(result.Resources, Resource{containerAppName, AzureContainerApp})
-	result.ProjectToResourceMappings = append(result.ProjectToResourceMappings,
-		ProjectToResourceMapping{projectPath, containerAppName})
+	projectRelativePath := filepath.Dir(pomRelativePathPath)
+	// 1. Add Application
+	applicationName := LabelName(filepath.Base(projectRelativePath))
+	err = addApplicationToResult(&result, applicationName, Application{projectRelativePath})
+	if err != nil {
+		return result, err
+	}
+	// 2. Add Application related hosting Service
+	hostingServiceName := applicationName
+	err = addApplicationRelatedHostingServiceToResult(&result, applicationName, hostingServiceName, AzureContainerApp{})
+	if err != nil {
+		return result, err
+	}
+	// 3. Add Application related backing Service
 	for _, dep := range pom.Dependencies {
 		if dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j" {
 			// todo:
-			// 1. support multiple container app use multiple mysql
-			// 2. Support multiple container app use one mysql
-			// 3. Same to other resources like postgresql
-			mysqlResourceName := "mysql"
-			result.Resources = append(result.Resources, Resource{mysqlResourceName, AzureDatabaseForMysql})
-			result.ResourceToResourceUsageBindings = append(result.ResourceToResourceUsageBindings,
-				ResourceToResourceUsageBinding{containerAppName, mysqlResourceName})
+			// a. support multiple container app use multiple mysql
+			// b. Support multiple container app use one mysql
+			// c. Same to other resources like postgresql
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMysqlServiceName,
+				AzureDatabaseForMysql{})
+			if err != nil {
+				return result, err
+			}
 		}
 		if dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql" {
-			postgresqlResourceName := "postgresql"
-			result.Resources = append(result.Resources, Resource{postgresqlResourceName, AzureDatabaseForPostgresql})
-			result.ResourceToResourceUsageBindings = append(result.ResourceToResourceUsageBindings,
-				ResourceToResourceUsageBinding{containerAppName, postgresqlResourceName})
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultPostgresqlServiceName,
+				AzureDatabaseForPostgresql{})
+			if err != nil {
+				return result, err
+			}
 		}
 		// todo: support other resource types.
 	}
