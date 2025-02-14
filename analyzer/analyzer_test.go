@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"ajpa/analyzer/internal"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -59,15 +61,15 @@ func TestAnalyzeJavaProject(t *testing.T) {
 func TestAnalyzePomProject(t *testing.T) {
 	tests := []struct {
 		name     string
-		testPoms []testPom
+		testPoms []internal.TestPom
 		expected ProjectAnalysisResult
 	}{
 		{
 			name: "not spring-boot runnable project",
-			testPoms: []testPom{
+			testPoms: []internal.TestPom{
 				{
-					pomFileRelativePath: "pom.xml",
-					pomContentString: `
+					PomFileRelativePath: "pom.xml",
+					PomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
 							<groupId>com.example</groupId>
@@ -95,10 +97,10 @@ func TestAnalyzePomProject(t *testing.T) {
 		},
 		{
 			name: "has mysql and postgresql dependency",
-			testPoms: []testPom{
+			testPoms: []internal.TestPom{
 				{
-					pomFileRelativePath: filepath.Join("application", "pom.xml"),
-					pomContentString: `
+					PomFileRelativePath: filepath.Join("application", "pom.xml"),
+					PomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
 							<parent>
@@ -158,12 +160,12 @@ func TestAnalyzePomProject(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			workingDir, err := prepareTestPomFiles(tt.testPoms)
+			workingDir, err := internal.PrepareTestPomFiles(tt.testPoms)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 			testPom := tt.testPoms[0]
-			pomFileAbsolutePath := filepath.Join(workingDir, testPom.pomFileRelativePath)
+			pomFileAbsolutePath := filepath.Join(workingDir, testPom.PomFileRelativePath)
 
 			project, err := analyzePomProject(workingDir, pomFileAbsolutePath)
 			if err != nil {

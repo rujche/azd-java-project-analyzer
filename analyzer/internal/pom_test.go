@@ -1,8 +1,7 @@
-package analyzer
+package internal
 
 import (
 	"log/slog"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -23,15 +22,15 @@ func TestCreateEffectivePom(t *testing.T) {
 	}
 	tests := []struct {
 		name     string
-		testPoms []testPom
+		testPoms []TestPom
 		expected []dependency
 	}{
 		{
 			name: "Test with two dependencies",
-			testPoms: []testPom{
+			testPoms: []TestPom{
 				{
-					pomFileRelativePath: "pom.xml",
-					pomContentString: `
+					PomFileRelativePath: "pom.xml",
+					PomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
 							<groupId>com.example</groupId>
@@ -72,10 +71,10 @@ func TestCreateEffectivePom(t *testing.T) {
 		},
 		{
 			name: "Test with no dependencies",
-			testPoms: []testPom{
+			testPoms: []TestPom{
 				{
-					pomFileRelativePath: "pom.xml",
-					pomContentString: `
+					PomFileRelativePath: "pom.xml",
+					PomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
 							<groupId>com.example</groupId>
@@ -91,10 +90,10 @@ func TestCreateEffectivePom(t *testing.T) {
 		},
 		{
 			name: "Test with one dependency which version is decided by dependencyManagement",
-			testPoms: []testPom{
+			testPoms: []TestPom{
 				{
-					pomFileRelativePath: "pom.xml",
-					pomContentString: `
+					PomFileRelativePath: "pom.xml",
+					PomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
 							<groupId>com.example</groupId>
@@ -132,10 +131,10 @@ func TestCreateEffectivePom(t *testing.T) {
 		},
 		{
 			name: "Test with one dependency which version is decided by parent",
-			testPoms: []testPom{
+			testPoms: []TestPom{
 				{
-					pomFileRelativePath: "pom.xml",
-					pomContentString: `
+					PomFileRelativePath: "pom.xml",
+					PomContentString: `
 						<project>
 							<parent>
 								<groupId>org.springframework.boot</groupId>
@@ -168,10 +167,10 @@ func TestCreateEffectivePom(t *testing.T) {
 		},
 		{
 			name: "Test pom with multi modules",
-			testPoms: []testPom{
+			testPoms: []TestPom{
 				{
-					pomFileRelativePath: "pom.xml",
-					pomContentString: `
+					PomFileRelativePath: "pom.xml",
+					PomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
 							<groupId>org.springframework</groupId>
@@ -186,8 +185,8 @@ func TestCreateEffectivePom(t *testing.T) {
 						`,
 				},
 				{
-					pomFileRelativePath: filepath.Join("application", "pom.xml"),
-					pomContentString: `
+					PomFileRelativePath: filepath.Join("application", "pom.xml"),
+					PomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
 							<parent>
@@ -215,8 +214,8 @@ func TestCreateEffectivePom(t *testing.T) {
 						`,
 				},
 				{
-					pomFileRelativePath: filepath.Join("library", "pom.xml"),
-					pomContentString: `
+					PomFileRelativePath: filepath.Join("library", "pom.xml"),
+					PomContentString: `
 						<project>
 							<modelVersion>4.0.0</modelVersion>
 							<parent>
@@ -252,14 +251,14 @@ func TestCreateEffectivePom(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			workingDir, err := prepareTestPomFiles(tt.testPoms)
+			workingDir, err := PrepareTestPomFiles(tt.testPoms)
 			if err != nil {
 				t.Fatalf("%v", err)
 			}
 			testPom := tt.testPoms[0]
-			pomFilePath := filepath.Join(workingDir, testPom.pomFileRelativePath)
+			pomFilePath := filepath.Join(workingDir, testPom.PomFileRelativePath)
 
-			mavenProject, err := createEffectivePom(pomFilePath)
+			mavenProject, err := CreateEffectivePom(pomFilePath)
 			if err != nil {
 				t.Fatalf("createEffectivePom failed: %v", err)
 			}
@@ -275,28 +274,4 @@ func TestCreateEffectivePom(t *testing.T) {
 			}
 		})
 	}
-}
-
-type testPom struct {
-	pomFileRelativePath string
-	pomContentString    string
-}
-
-func prepareTestPomFiles(testPoms []testPom) (string, error) {
-	tempDir, err := os.MkdirTemp("", "prepareTestPomFiles")
-	if err != nil {
-		return "", err
-	}
-	for _, testPom := range testPoms {
-		pomPath := filepath.Join(tempDir, testPom.pomFileRelativePath)
-		err := os.MkdirAll(filepath.Dir(pomPath), 0755)
-		if err != nil {
-			return "", err
-		}
-		err = os.WriteFile(pomPath, []byte(testPom.pomContentString), 0600)
-		if err != nil {
-			return "", err
-		}
-	}
-	return tempDir, nil
 }

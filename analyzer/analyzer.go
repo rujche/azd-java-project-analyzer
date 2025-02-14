@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"ajpa/analyzer/internal"
 )
 
 func AnalyzeJavaProject(projectRootPath string) (ProjectAnalysisResult, error) {
@@ -50,7 +52,7 @@ func analyzeJavaProjectSubDirectory(projectRootPath string, subDirectoryPath str
 }
 
 func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (ProjectAnalysisResult, error) {
-	pom, err := createEffectivePom(pomFileAbsolutePath)
+	pom, err := internal.CreateEffectivePom(pomFileAbsolutePath)
 	if err != nil {
 		return ProjectAnalysisResult{}, fmt.Errorf("creating effective pom: %w", err)
 	}
@@ -58,14 +60,14 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	if err != nil {
 		return ProjectAnalysisResult{}, err
 	}
-	pom.pomFilePath = pomRelativePathPath
+	pom.PomFilePath = pomRelativePathPath
 	if !isSpringBootRunnableProject(pom) {
 		return ProjectAnalysisResult{}, nil
 	}
 	result := ProjectAnalysisResult{}
 	projectRelativePath := filepath.Dir(pomRelativePathPath)
 	// 1. Add Application
-	applicationName := LabelName(filepath.Base(projectRelativePath))
+	applicationName := internal.LabelName(filepath.Base(projectRelativePath))
 	err = addApplicationToResult(&result, applicationName, Application{projectRelativePath})
 	if err != nil {
 		return result, err
@@ -101,7 +103,7 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	return result, nil
 }
 
-func isSpringBootRunnableProject(pom pom) bool {
+func isSpringBootRunnableProject(pom internal.Pom) bool {
 	if len(pom.Modules) > 0 {
 		return false
 	}

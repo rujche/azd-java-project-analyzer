@@ -1,4 +1,4 @@
-package analyzer
+package internal
 
 import (
 	"bufio"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type pom struct {
+type Pom struct {
 	XmlName                 xml.Name             `xml:"project"`
 	Parent                  parent               `xml:"parent"`
 	GroupId                 string               `xml:"groupId"`
@@ -21,7 +21,7 @@ type pom struct {
 	DependencyManagement    dependencyManagement `xml:"dependencyManagement"`
 	Profiles                []profile            `xml:"profiles>profile"`
 	Build                   build                `xml:"build"`
-	pomFilePath             string
+	PomFilePath             string
 	propertyMap             map[string]string
 	dependencyManagementMap map[string]string
 }
@@ -80,20 +80,20 @@ type plugin struct {
 	Version    string `xml:"version"`
 }
 
-func createEffectivePom(pomPath string) (pom, error) {
+func CreateEffectivePom(pomPath string) (Pom, error) {
 	// todo:
 	// 1. Use maven wrapper if exists.
 	// 2. Download maven if "mvn" command not exist in path.
 	cmd := exec.Command("mvn", "help:effective-pom", "-f", pomPath)
 	output, err := cmd.Output()
 	if err != nil {
-		return pom{}, err
+		return Pom{}, err
 	}
 	effectivePomString, err := getEffectivePomStringFromConsoleOutput(string(output))
 	if err != nil {
-		return pom{}, err
+		return Pom{}, err
 	}
-	var resultPom pom
+	var resultPom Pom
 	err = xml.Unmarshal([]byte(effectivePomString), &resultPom)
 	return resultPom, nil
 }

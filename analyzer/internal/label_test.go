@@ -1,4 +1,4 @@
-package analyzer
+package internal
 
 import (
 	"testing"
