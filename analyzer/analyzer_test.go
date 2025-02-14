@@ -11,17 +11,17 @@ func TestAnalyzeJavaProject(t *testing.T) {
 	tests := []struct {
 		name             string
 		workingDirectory string
-		expected         Project
+		expected         ProjectAnalysisResult
 	}{
 		{
 			name:             "java",
 			workingDirectory: filepath.Join("testdata", "java"),
-			expected:         Project{},
+			expected:         ProjectAnalysisResult{},
 		},
 		{
 			name:             "java-multiple-modules",
 			workingDirectory: filepath.Join("testdata", "java-multiple-modules"),
-			expected: Project{
+			expected: ProjectAnalysisResult{
 				resources: []Resource{
 					{
 						resourceName: "application",
@@ -73,7 +73,7 @@ func TestAnalyzePomProject(t *testing.T) {
 	tests := []struct {
 		name     string
 		testPoms []testPom
-		expected Project
+		expected ProjectAnalysisResult
 	}{
 		{
 			name: "not spring-boot runnable project",
@@ -104,7 +104,7 @@ func TestAnalyzePomProject(t *testing.T) {
 						`,
 				},
 			},
-			expected: Project{},
+			expected: ProjectAnalysisResult{},
 		},
 		{
 			name: "has mysql and postgresql dependency",
@@ -146,7 +146,7 @@ func TestAnalyzePomProject(t *testing.T) {
 						`,
 				},
 			},
-			expected: Project{
+			expected: ProjectAnalysisResult{
 				resources: []Resource{
 					{
 						resourceName: "app-one",

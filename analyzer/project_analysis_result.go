@@ -1,6 +1,6 @@
 package analyzer
 
-type Project struct {
+type ProjectAnalysisResult struct {
 	resources                       []Resource
 	resourceToResourceUsageBindings []ResourceToResourceUsageBinding
 	projectToResourceMappings       []ProjectToResourceMapping
@@ -36,12 +36,12 @@ type ProjectToResourceMapping struct {
 	resourceName        string
 }
 
-func mergeProject(project1 Project, project2 Project) Project {
+func mergeProject(result1 ProjectAnalysisResult, result2 ProjectAnalysisResult) ProjectAnalysisResult {
 	// todo: handle duplicated error
-	return Project{
-		resources: append(project1.resources, project2.resources...),
-		resourceToResourceUsageBindings: append(project1.resourceToResourceUsageBindings,
-			project2.resourceToResourceUsageBindings...),
-		projectToResourceMappings: append(project1.projectToResourceMappings, project2.projectToResourceMappings...),
+	return ProjectAnalysisResult{
+		resources: append(result1.resources, result2.resources...),
+		resourceToResourceUsageBindings: append(result1.resourceToResourceUsageBindings,
+			result2.resourceToResourceUsageBindings...),
+		projectToResourceMappings: append(result1.projectToResourceMappings, result2.projectToResourceMappings...),
 	}
 }

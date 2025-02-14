@@ -7,60 +7,60 @@ import (
 	"strings"
 )
 
-func analyzeJavaProject(projectRootPath string) (Project, error) {
+func analyzeJavaProject(projectRootPath string) (ProjectAnalysisResult, error) {
 	return analyzeJavaProjectSubDirectory(projectRootPath, projectRootPath)
 }
 
-func analyzeJavaProjectSubDirectory(projectRootPath string, subDirectoryPath string) (Project, error) {
+func analyzeJavaProjectSubDirectory(projectRootPath string, subDirectoryPath string) (ProjectAnalysisResult, error) {
 	entries, err := os.ReadDir(subDirectoryPath)
 	if err != nil {
-		return Project{}, fmt.Errorf("reading directory: %w", err)
+		return ProjectAnalysisResult{}, fmt.Errorf("reading directory: %w", err)
 	}
-	resultProject := Project{}
+	result := ProjectAnalysisResult{}
 	for _, entry := range entries {
 		if entry.IsDir() {
-			newProject, err := analyzeJavaProjectSubDirectory(projectRootPath,
+			newResult, err := analyzeJavaProjectSubDirectory(projectRootPath,
 				filepath.Join(subDirectoryPath, entry.Name()))
 			if err != nil {
-				return Project{}, fmt.Errorf("analyzing java project: %w", err)
+				return ProjectAnalysisResult{}, fmt.Errorf("analyzing java project: %w", err)
 			}
-			resultProject = mergeProject(resultProject, newProject)
+			result = mergeProject(result, newResult)
 		} else {
 			// todo:
 			// 1. Support file names like backend-pom.xml
 			// 2. Support build.gradle
 			if strings.ToLower(entry.Name()) == "pom.xml" {
 				pomPath := filepath.Join(subDirectoryPath, entry.Name())
-				newProject, err := analyzePomProject(projectRootPath, pomPath)
+				newResult, err := analyzePomProject(projectRootPath, pomPath)
 				if err != nil {
-					return Project{}, err
+					return ProjectAnalysisResult{}, err
 				}
 				// todo: consider multiple pom use same Azure resource
-				resultProject = mergeProject(resultProject, newProject)
+				result = mergeProject(result, newResult)
 			}
 		}
 	}
-	return resultProject, nil
+	return result, nil
 }
 
-func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Project, error) {
+func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (ProjectAnalysisResult, error) {
 	pom, err := createEffectivePom(pomFileAbsolutePath)
 	if err != nil {
-		return Project{}, fmt.Errorf("creating effective pom: %w", err)
+		return ProjectAnalysisResult{}, fmt.Errorf("creating effective pom: %w", err)
 	}
 	pomRelativePathPath, err := filepath.Rel(projectRootPath, pomFileAbsolutePath)
 	if err != nil {
-		return Project{}, err
+		return ProjectAnalysisResult{}, err
 	}
 	pom.pomFilePath = pomRelativePathPath
 	if !isSpringBootRunnableProject(pom) {
-		return Project{}, nil
+		return ProjectAnalysisResult{}, nil
 	}
-	project := Project{}
+	result := ProjectAnalysisResult{}
 	projectPath := filepath.Dir(pomRelativePathPath)
 	containerAppName := LabelName(filepath.Base(projectPath))
-	project.resources = append(project.resources, Resource{containerAppName, AzureContainerApp})
-	project.projectToResourceMappings = append(project.projectToResourceMappings,
+	result.resources = append(result.resources, Resource{containerAppName, AzureContainerApp})
+	result.projectToResourceMappings = append(result.projectToResourceMappings,
 		ProjectToResourceMapping{projectPath, containerAppName})
 	for _, dep := range pom.Dependencies {
 		if dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j" {
@@ -69,19 +69,19 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 			// 2. Support multiple container app use one mysql
 			// 3. Same to other resources like postgresql
 			mysqlResourceName := "mysql"
-			project.resources = append(project.resources, Resource{mysqlResourceName, AzureDatabaseForMysql})
-			project.resourceToResourceUsageBindings = append(project.resourceToResourceUsageBindings,
+			result.resources = append(result.resources, Resource{mysqlResourceName, AzureDatabaseForMysql})
+			result.resourceToResourceUsageBindings = append(result.resourceToResourceUsageBindings,
 				ResourceToResourceUsageBinding{containerAppName, mysqlResourceName})
 		}
 		if dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql" {
 			postgresqlResourceName := "postgresql"
-			project.resources = append(project.resources, Resource{postgresqlResourceName, AzureDatabaseForPostgresql})
-			project.resourceToResourceUsageBindings = append(project.resourceToResourceUsageBindings,
+			result.resources = append(result.resources, Resource{postgresqlResourceName, AzureDatabaseForPostgresql})
+			result.resourceToResourceUsageBindings = append(result.resourceToResourceUsageBindings,
 				ResourceToResourceUsageBinding{containerAppName, postgresqlResourceName})
 		}
 		// todo: support other resource types.
 	}
-	return project, nil
+	return result, nil
 }
 
 func isSpringBootRunnableProject(pom pom) bool {
