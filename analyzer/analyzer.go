@@ -81,12 +81,14 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 		return result, err
 	}
 	// 3. Add Application related backing Service
-	properties := internal.ReadProperties(filepath.Dir(pomRelativePathPath))
+	properties := internal.ReadProperties(filepath.Dir(pomFileAbsolutePath))
 	databaseName := ""
 	databaseNamePropertyValue, ok := properties["spring.datasource.url"]
 	if ok {
 		databaseName = internal.GetDatabaseName(databaseNamePropertyValue)
 	}
+	bindingDestinationMap := internal.GetBindingDestinationMap(properties)
+	bindingDestinationValues := internal.DistinctValues(bindingDestinationMap)
 	for _, dep := range pom.Dependencies {
 		if dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j" {
 			// todo:
@@ -110,6 +112,14 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-servicebus-jms" {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
 				AzureServiceBus{})
+			if err != nil {
+				return result, err
+			}
+		}
+		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-stream-binder-servicebus" {
+			// todo: merge queues and topics if multiple dependencies (or apps) use one Azure Service Bus.
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
+				AzureServiceBus{Queues: bindingDestinationValues})
 			if err != nil {
 				return result, err
 			}

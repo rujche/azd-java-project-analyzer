@@ -160,3 +160,28 @@ func IsValidDatabaseName(name string) bool {
 	re := regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 	return re.MatchString(name)
 }
+
+func GetBindingDestinationMap(properties map[string]string) map[string]string {
+	result := make(map[string]string)
+	// Iterate through the properties map and look for matching keys
+	for key, value := range properties {
+		// Check if the key matches the pattern `spring.cloud.stream.bindings.<binding-name>.destination`
+		if strings.HasPrefix(key, "spring.cloud.stream.bindings.") && strings.HasSuffix(key, ".destination") {
+			// Store the binding name and destination value
+			result[key] = fmt.Sprintf("%v", value)
+		}
+	}
+	return result
+}
+
+func DistinctValues(input map[string]string) []string {
+	valueSet := make(map[string]struct{})
+	for _, value := range input {
+		valueSet[value] = struct{}{}
+	}
+	var result []string
+	for value := range valueSet {
+		result = append(result, value)
+	}
+	return result
+}
