@@ -11,7 +11,16 @@ go build
 
 ## Executable binary executable
 
+### 1. Example 1: Change directory then run ajpa
+
 ```shell
+cd ${WORKING_DIRECTORY}
 ./ajpa
+```
+
+### 2. Example 2: Run ajpa with `-cwd` parameter
+
+```shell
+./ajpa -cwd ${WORKING_DIRECTORY}
 ```
 
