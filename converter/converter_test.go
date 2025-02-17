@@ -18,6 +18,7 @@ func TestProjectAnalysisResultToAzdProjectConfig(t *testing.T) {
 		{
 			name: "one dependency: postgresql",
 			result: analyzer.ProjectAnalysisResult{
+				Name: "app-one-sample",
 				Applications: map[string]analyzer.Application{
 					"app-one": {ProjectRelativePath: "app-one"},
 				},
@@ -35,12 +36,14 @@ func TestProjectAnalysisResultToAzdProjectConfig(t *testing.T) {
 				},
 			},
 			expected: project.ProjectConfig{
+				Name: "app-one-sample",
 				Services: map[string]*project.ServiceConfig{
 					"app-one": {
 						Project:      nil, // will be updated in test
 						Name:         "app-one",
 						Language:     project.ServiceLanguageJava,
 						RelativePath: "app-one",
+						Host:         project.ContainerAppTarget,
 					},
 				},
 				Resources: map[string]*project.ResourceConfig{
@@ -49,6 +52,9 @@ func TestProjectAnalysisResultToAzdProjectConfig(t *testing.T) {
 						Type:    project.ResourceTypeHostContainerApp,
 						Name:    "app-one",
 						Uses:    []string{analyzer.DefaultPostgresqlServiceName},
+						Props: project.ContainerAppProps{
+							Port: 8080,
+						},
 					},
 					analyzer.DefaultPostgresqlServiceName: {
 						Project: nil, // will be updated in test

@@ -18,12 +18,15 @@ func TestAnalyzeJavaProject(t *testing.T) {
 		{
 			name:             "java",
 			workingDirectory: filepath.Join("testdata", "java"),
-			expected:         ProjectAnalysisResult{},
+			expected: ProjectAnalysisResult{
+				Name: "java",
+			},
 		},
 		{
 			name:             "java-multiple-modules",
 			workingDirectory: filepath.Join("testdata", "java-multiple-modules"),
 			expected: ProjectAnalysisResult{
+				Name: "java-multiple-modules",
 				Applications: map[string]Application{
 					"application": {"application"},
 				},

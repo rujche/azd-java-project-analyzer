@@ -18,7 +18,9 @@ func analyzeJavaProjectSubDirectory(projectRootPath string, subDirectoryPath str
 	if err != nil {
 		return ProjectAnalysisResult{}, fmt.Errorf("reading directory: %w", err)
 	}
-	result := ProjectAnalysisResult{}
+	result := ProjectAnalysisResult{
+		Name: filepath.Base(projectRootPath),
+	}
 	for _, entry := range entries {
 		if entry.IsDir() {
 			newResult, err := analyzeJavaProjectSubDirectory(projectRootPath,
@@ -67,7 +69,7 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	result := ProjectAnalysisResult{}
 	projectRelativePath := filepath.Dir(pomRelativePathPath)
 	// 1. Add Application
-	applicationName := internal.LabelName(filepath.Base(projectRelativePath))
+	applicationName := internal.GetNameFromDirPath(filepath.Dir(pomFileAbsolutePath))
 	err = addApplicationToResult(&result, applicationName, Application{projectRelativePath})
 	if err != nil {
 		return result, err
@@ -82,16 +84,17 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	for _, dep := range pom.Dependencies {
 		if dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j" {
 			// todo:
-			// a. support multiple container app use multiple mysql
-			// b. Support multiple container app use one mysql
-			// c. Same to other resources like postgresql
+			// 1. support multiple container app use multiple mysql
+			// 2. Support multiple container app use one mysql
+			// 3. Same to other resources like postgresql
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMysqlServiceName,
 				AzureDatabaseForMysql{})
 			if err != nil {
 				return result, err
 			}
 		}
-		if dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql" {
+		if (dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql") ||
+			(dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-jdbc-postgresql") {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultPostgresqlServiceName,
 				AzureDatabaseForPostgresql{})
 			if err != nil {

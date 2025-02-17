@@ -3,6 +3,7 @@ package analyzer
 import "fmt"
 
 type ProjectAnalysisResult struct {
+	Name                        string
 	Applications                map[string]Application            // application name -> Application
 	Services                    map[string]Service                // service name -> Service
 	ApplicationToHostingService map[string]string                 // application name -> hosting Service name
