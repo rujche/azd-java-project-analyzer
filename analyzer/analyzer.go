@@ -107,6 +107,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 				return result, err
 			}
 		}
+		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-servicebus-jms" {
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
+				AzureServiceBus{})
+			if err != nil {
+				return result, err
+			}
+		}
 		// todo: support other resource types.
 	}
 	return result, nil

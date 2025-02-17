@@ -56,19 +56,26 @@ func toResourceType(service analyzer.Service) (project.ResourceType, error) {
 		return project.ResourceTypeDbPostgres, nil
 	case analyzer.AzureDatabaseForMysql:
 		return project.ResourceTypeDbPostgres, nil // todo: change to mysql when azd support mysql
+	case analyzer.AzureServiceBus:
+		return project.ResourceTypeMessagingServiceBus, nil
 	default:
 		return "", fmt.Errorf("unknown service type: %v", service)
 	}
 }
 
 func toProps(service analyzer.Service) (interface{}, error) {
-	switch service.(type) {
+	switch s := service.(type) {
 	case analyzer.AzureContainerApp:
 		return project.ContainerAppProps{
 			Port: 8080, // todo: support non-web app.
 		}, nil
 	case analyzer.AzureDatabaseForPostgresql, analyzer.AzureDatabaseForMysql:
 		return nil, nil // todo: Add database name in PostgresqlProps
+	case analyzer.AzureServiceBus:
+		return project.ServiceBusProps{
+			Queues: s.Queues,
+			Topics: s.Topics,
+		}, nil
 	default:
 		return "", fmt.Errorf("unknown service type when get Props: %v", service)
 	}

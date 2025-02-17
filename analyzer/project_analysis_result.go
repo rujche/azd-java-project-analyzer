@@ -35,6 +35,13 @@ type AzureDatabaseForMysql struct {
 	DatabaseName string
 }
 
+const DefaultServiceBusServiceName = "service-bus"
+
+type AzureServiceBus struct {
+	Queues []string
+	Topics []string
+}
+
 func addApplicationToResult(result *ProjectAnalysisResult, applicationName string, application Application) error {
 	if _, ok := result.Applications[applicationName]; ok {
 		return fmt.Errorf("applicationName %s already exists", applicationName)
