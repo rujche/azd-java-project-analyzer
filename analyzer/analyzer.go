@@ -81,6 +81,12 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 		return result, err
 	}
 	// 3. Add Application related backing Service
+	properties := internal.ReadProperties(filepath.Dir(pomRelativePathPath))
+	databaseName := ""
+	databaseNamePropertyValue, ok := properties["spring.datasource.url"]
+	if ok {
+		databaseName = internal.GetDatabaseName(databaseNamePropertyValue)
+	}
 	for _, dep := range pom.Dependencies {
 		if dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j" {
 			// todo:
@@ -88,7 +94,7 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 			// 2. Support multiple container app use one mysql
 			// 3. Same to other resources like postgresql
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMysqlServiceName,
-				AzureDatabaseForMysql{})
+				AzureDatabaseForMysql{databaseName})
 			if err != nil {
 				return result, err
 			}
@@ -96,7 +102,7 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 		if (dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql") ||
 			(dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-jdbc-postgresql") {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultPostgresqlServiceName,
-				AzureDatabaseForPostgresql{})
+				AzureDatabaseForPostgresql{databaseName})
 			if err != nil {
 				return result, err
 			}

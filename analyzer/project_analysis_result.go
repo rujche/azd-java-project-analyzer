@@ -24,13 +24,15 @@ type AzureContainerApp struct { // todo: Support other hosting Service like AKS.
 const DefaultPostgresqlServiceName string = "postgresql"
 
 type AzureDatabaseForPostgresql struct {
-	// todo: Add fields like auth type, db name
+	// todo: Add fields like auth type
+	DatabaseName string
 }
 
 const DefaultMysqlServiceName = "mysql"
 
 type AzureDatabaseForMysql struct {
-	// todo: Add fields like auth type, db name
+	// todo: Add fields like auth type
+	DatabaseName string
 }
 
 func addApplicationToResult(result *ProjectAnalysisResult, applicationName string, application Application) error {

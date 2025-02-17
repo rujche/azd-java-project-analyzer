@@ -65,10 +65,10 @@ func toProps(service analyzer.Service) (interface{}, error) {
 	switch service.(type) {
 	case analyzer.AzureContainerApp:
 		return project.ContainerAppProps{
-			Port: 8080,
+			Port: 8080, // todo: support non-web app.
 		}, nil
 	case analyzer.AzureDatabaseForPostgresql, analyzer.AzureDatabaseForMysql:
-		return nil, nil
+		return nil, nil // todo: Add database name in PostgresqlProps
 	default:
 		return "", fmt.Errorf("unknown service type when get Props: %v", service)
 	}
