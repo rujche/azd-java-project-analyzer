@@ -9,7 +9,7 @@ The generated azure.yaml can be used to deploy project by [azd](https://github.c
 go build
 ```
 
-## Executable binary executable
+## Execute binary executable
 
 ### 1. Example 1: Change directory then run ajpa
 
