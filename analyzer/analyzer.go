@@ -90,7 +90,8 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	bindingDestinationMap := internal.GetBindingDestinationMap(properties)
 	bindingDestinationValues := internal.DistinctValues(bindingDestinationMap)
 	for _, dep := range pom.Dependencies {
-		if dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j" {
+		if (dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j") ||
+			(dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-jdbc-mysql") {
 			// todo:
 			// 1. support multiple container app use multiple mysql
 			// 2. Support multiple container app use one mysql
