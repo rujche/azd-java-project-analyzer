@@ -101,46 +101,40 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 			if err != nil {
 				return result, err
 			}
-		}
-		if (dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql") ||
+		} else if (dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql") ||
 			(dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-jdbc-postgresql") {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultPostgresqlServiceName,
 				AzureDatabaseForPostgresql{databaseName})
 			if err != nil {
 				return result, err
 			}
-		}
-		if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-redis") ||
+		} else if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-redis") ||
 			(dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-redis-reactive") {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultRedisServiceName,
 				AzureCacheForRedis{})
 			if err != nil {
 				return result, err
 			}
-		}
-		if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb") ||
+		} else if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb") ||
 			(dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb-reactive") {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMongoServiceName,
 				AzureCosmosDbForMongoDb{})
 			if err != nil {
 				return result, err
 			}
-		}
-		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-data-cosmos" {
+		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-data-cosmos" {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultCosmosServiceName,
 				AzureCosmosDb{})
 			if err != nil {
 				return result, err
 			}
-		}
-		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-servicebus-jms" {
+		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-servicebus-jms" {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
 				AzureServiceBus{})
 			if err != nil {
 				return result, err
 			}
-		}
-		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-stream-binder-servicebus" {
+		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-stream-binder-servicebus" {
 			// todo: merge queues and topics if multiple dependencies (or apps) use one Azure Service Bus.
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
 				AzureServiceBus{Queues: bindingDestinationValues})
