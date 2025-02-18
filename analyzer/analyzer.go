@@ -165,6 +165,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 			if err != nil {
 				return result, err
 			}
+		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-integration-eventhubs" {
+			// eventhubs name is empty here because no configured property
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultEventHubsServiceName,
+				AzureEventHubs{})
+			if err != nil {
+				return result, err
+			}
 		}
 		// todo: support other resource types.
 	}
