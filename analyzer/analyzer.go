@@ -185,13 +185,20 @@ func detectServiceBus(result *ProjectAnalysisResult, applicationName string, pom
 
 func detectEventHubs(result *ProjectAnalysisResult, applicationName string, pom internal.Pom,
 	properties map[string]string) error {
-	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-eventhubs") {
-		err := addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
-			AzureEventHubs{Hubs: internal.GetBindingDestinationValues(properties)})
-		if err != nil {
-			return err
-		}
-	} else if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-eventhubs") {
+	if !hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-eventhubs") &&
+		!hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-eventhubs") &&
+		!hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-integration-eventhubs") &&
+		!hasDependency(pom, "com.azure.spring", "spring-messaging-azure-eventhubs") &&
+		!hasDependency(pom, "com.azure.spring", "spring-cloud-starter-stream-kafka") &&
+		!hasDependency(pom, "com.azure.spring", "spring-kafka") {
+		return nil
+	}
+	var hubs []string
+	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-eventhubs") ||
+		hasDependency(pom, "org.springframework.cloud", "spring-cloud-starter-stream-kafka") {
+		hubs = append(hubs, internal.GetBindingDestinationValues(properties)...)
+	}
+	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-eventhubs") {
 		var targetPropertyNames = []string{
 			"spring.cloud.azure.eventhubs.event-hub-name",
 			"spring.cloud.azure.eventhubs.producer.event-hub-name",
@@ -204,42 +211,10 @@ func detectEventHubs(result *ProjectAnalysisResult, applicationName string, pom 
 				eventHubsNamePropertyMap[propertyName] = propertyValue
 			}
 		}
-		eventHubsNamePropertyValues := internal.DistinctValues(eventHubsNamePropertyMap)
-		err := addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
-			AzureEventHubs{Hubs: eventHubsNamePropertyValues})
-		if err != nil {
-			return err
-		}
-	} else if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-integration-eventhubs") {
-		// eventhubs name is empty here because no configured property
-		err := addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
-			AzureEventHubs{})
-		if err != nil {
-			return err
-		}
-	} else if hasDependency(pom, "com.azure.spring", "spring-messaging-azure-eventhubs") {
-		// eventhubs name is empty here because no configured property
-		err := addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
-			AzureEventHubs{})
-		if err != nil {
-			return err
-		}
-	} else if hasDependency(pom, "org.springframework.cloud", "spring-cloud-starter-stream-kafka") {
-		// todo: 1. add spring boot version related property. 2. Differentiate event hub and event hub kafka.
-		err := addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
-			AzureEventHubs{Hubs: internal.GetBindingDestinationValues(properties)})
-		if err != nil {
-			return err
-		}
-	} else if hasDependency(pom, "org.springframework.kafka", "spring-kafka") {
-		// eventhubs name is empty here because no configured property
-		err := addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
-			AzureEventHubs{})
-		if err != nil {
-			return err
-		}
+		hubs = append(hubs, internal.DistinctValues(eventHubsNamePropertyMap)...)
 	}
-	return nil
+	return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
+		AzureEventHubs{Hubs: hubs})
 }
 
 func hasDependency(pom internal.Pom, groupId string, artifactId string) bool {

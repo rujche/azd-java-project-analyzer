@@ -126,7 +126,6 @@ func addApplicationRelatedBackingServiceToResult(result *ProjectAnalysisResult, 
 		result.ApplicationToBackingService[applicationName] = make(map[string]interface{})
 	}
 	if _, ok := result.ApplicationToBackingService[applicationName][backingServiceName]; ok {
-		// todo: merge property (like service bus queue names) instead of return error
 		return fmt.Errorf("applicationToBackingService (%s -> %s) already exists", applicationName, backingServiceName)
 	}
 	result.ApplicationToBackingService[applicationName][backingServiceName] = ""
