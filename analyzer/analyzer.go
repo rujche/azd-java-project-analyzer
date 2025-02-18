@@ -142,9 +142,29 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 				return result, err
 			}
 		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-stream-binder-eventhubs" {
-			// todo: merge queues and topics if multiple dependencies (or apps) use one Azure Event Hubs.
+			// todo: merge hubs if multiple dependencies (or apps) use one Azure Event Hubs.
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultEventHubsServiceName,
 				AzureEventHubs{Hubs: bindingDestinationValues})
+			if err != nil {
+				return result, err
+			}
+		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-eventhubs" {
+			// todo: merge hubs if multiple dependencies (or apps) use one Azure Event Hubs.
+			var targetPropertyNames = []string{
+				"spring.cloud.azure.eventhubs.event-hub-name",
+				"spring.cloud.azure.eventhubs.producer.event-hub-name",
+				"spring.cloud.azure.eventhubs.consumer.event-hub-name",
+				"spring.cloud.azure.eventhubs.processor.event-hub-name",
+			}
+			eventHubsNamePropertyMap := map[string]string{}
+			for _, propertyName := range targetPropertyNames {
+				if propertyValue, ok := properties[propertyName]; ok {
+					eventHubsNamePropertyMap[propertyName] = propertyValue
+				}
+			}
+			eventHubsNamePropertyValues := internal.DistinctValues(eventHubsNamePropertyMap)
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultEventHubsServiceName,
+				AzureEventHubs{Hubs: eventHubsNamePropertyValues})
 			if err != nil {
 				return result, err
 			}
