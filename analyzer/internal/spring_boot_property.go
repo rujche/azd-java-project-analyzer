@@ -174,6 +174,10 @@ func GetBindingDestinationMap(properties map[string]string) map[string]string {
 	return result
 }
 
+func GetBindingDestinationValues(properties map[string]string) []string {
+	return DistinctValues(GetBindingDestinationMap(properties))
+}
+
 func DistinctValues(input map[string]string) []string {
 	valueSet := make(map[string]struct{})
 	for _, value := range input {
