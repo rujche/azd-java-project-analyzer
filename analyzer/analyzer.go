@@ -135,21 +135,18 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 				return result, err
 			}
 		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-stream-binder-servicebus" {
-			// todo: merge queues and topics if multiple dependencies (or apps) use one Azure Service Bus.
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
 				AzureServiceBus{Queues: bindingDestinationValues})
 			if err != nil {
 				return result, err
 			}
 		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-stream-binder-eventhubs" {
-			// todo: merge hubs if multiple dependencies (or apps) use one Azure Event Hubs.
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultEventHubsServiceName,
 				AzureEventHubs{Hubs: bindingDestinationValues})
 			if err != nil {
 				return result, err
 			}
 		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-eventhubs" {
-			// todo: merge hubs if multiple dependencies (or apps) use one Azure Event Hubs.
 			var targetPropertyNames = []string{
 				"spring.cloud.azure.eventhubs.event-hub-name",
 				"spring.cloud.azure.eventhubs.producer.event-hub-name",
