@@ -91,17 +91,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	if err = detectRedis(&result, applicationName, pom); err != nil {
 		return ProjectAnalysisResult{}, err
 	}
+	if err = detectMongo(&result, applicationName, pom); err != nil {
+		return ProjectAnalysisResult{}, err
+	}
 	bindingDestinationMap := internal.GetBindingDestinationMap(properties)
 	bindingDestinationValues := internal.DistinctValues(bindingDestinationMap)
 	for _, dep := range pom.Dependencies {
-		if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb") ||
-			(dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb-reactive") {
-			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMongoServiceName,
-				AzureCosmosDbForMongoDb{})
-			if err != nil {
-				return result, err
-			}
-		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-data-cosmos" {
+		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-data-cosmos" {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultCosmosServiceName,
 				AzureCosmosDb{})
 			if err != nil {
@@ -220,6 +216,15 @@ func detectRedis(result *ProjectAnalysisResult, applicationName string, pom inte
 		hasDependency(pom, "org.springframework.boot", "spring-boot-starter-data-redis-reactive") {
 		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultRedisServiceName,
 			AzureCacheForRedis{})
+	}
+	return nil
+}
+
+func detectMongo(result *ProjectAnalysisResult, applicationName string, pom internal.Pom) error {
+	if hasDependency(pom, "org.springframework.boot", "spring-boot-starter-data-mongodb") ||
+		hasDependency(pom, "org.springframework.boot", "spring-boot-starter-data-mongodb-reactive") {
+		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultMongoServiceName,
+			AzureCosmosDbForMongoDb{})
 	}
 	return nil
 }
