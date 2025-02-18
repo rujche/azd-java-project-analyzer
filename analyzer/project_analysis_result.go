@@ -47,6 +47,12 @@ type AzureCosmosDbForMongoDb struct {
 	// todo: Add fields like auth type
 }
 
+const DefaultCosmosServiceName = "cosmos"
+
+type AzureCosmosDb struct {
+	// todo: Add fields like auth type
+}
+
 const DefaultServiceBusServiceName = "service-bus"
 
 type AzureServiceBus struct {

@@ -76,7 +76,8 @@ func toProps(service analyzer.Service) (interface{}, error) {
 	case analyzer.AzureDatabaseForPostgresql, // todo: Add database name in PostgresqlProps
 		analyzer.AzureDatabaseForMysql,
 		analyzer.AzureCacheForRedis,
-		analyzer.AzureCosmosDbForMongoDb:
+		analyzer.AzureCosmosDbForMongoDb,
+		analyzer.AzureCosmosDb:
 		return nil, nil
 	case analyzer.AzureServiceBus:
 		return project.ServiceBusProps{

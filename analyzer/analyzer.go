@@ -126,6 +126,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 				return result, err
 			}
 		}
+		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-data-cosmos" {
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultCosmosServiceName,
+				AzureCosmosDb{})
+			if err != nil {
+				return result, err
+			}
+		}
 		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-servicebus-jms" {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
 				AzureServiceBus{})
