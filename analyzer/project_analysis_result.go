@@ -118,12 +118,11 @@ func addApplicationRelatedBackingServiceToResult(result *ProjectAnalysisResult, 
 	if result.Services == nil {
 		result.Services = make(map[string]Service)
 	}
-	// todo: support multiple application use same backing Service,
-	// merge properties (like database name) instead of return error
 	if _, ok := result.Services[backingServiceName]; ok {
-		return fmt.Errorf("backingServiceName %s already exists", backingServiceName)
+		// todo: merge properties (like database name)
+	} else {
+		result.Services[backingServiceName] = backingService
 	}
-	result.Services[backingServiceName] = backingService
 	// 3. Add Application to backing Service mapping
 	if result.ApplicationToBackingService == nil {
 		result.ApplicationToBackingService = make(map[string]map[string]interface{})
