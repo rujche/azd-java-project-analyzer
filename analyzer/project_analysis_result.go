@@ -41,6 +41,12 @@ type AzureCacheForRedis struct {
 	// todo: Add fields like auth type
 }
 
+const DefaultMongoServiceName = "redis"
+
+type AzureCosmosDbForMongoDb struct {
+	// todo: Add fields like auth type
+}
+
 const DefaultServiceBusServiceName = "service-bus"
 
 type AzureServiceBus struct {

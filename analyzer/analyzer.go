@@ -118,6 +118,14 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 				return result, err
 			}
 		}
+		if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb") ||
+			(dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb-reactive") {
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMongoServiceName,
+				AzureCosmosDbForMongoDb{})
+			if err != nil {
+				return result, err
+			}
+		}
 		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-servicebus-jms" {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
 				AzureServiceBus{})

@@ -58,6 +58,8 @@ func toResourceType(service analyzer.Service) (project.ResourceType, error) {
 		return project.ResourceTypeDbPostgres, nil // todo: change to mysql when azd support mysql
 	case analyzer.AzureCacheForRedis:
 		return project.ResourceTypeDbRedis, nil
+	case analyzer.AzureCosmosDbForMongoDb:
+		return project.ResourceTypeDbMongo, nil
 	case analyzer.AzureServiceBus:
 		return project.ResourceTypeMessagingServiceBus, nil
 	default:
@@ -71,8 +73,11 @@ func toProps(service analyzer.Service) (interface{}, error) {
 		return project.ContainerAppProps{
 			Port: 8080, // todo: support non-web app.
 		}, nil
-	case analyzer.AzureDatabaseForPostgresql, analyzer.AzureDatabaseForMysql:
-		return nil, nil // todo: Add database name in PostgresqlProps
+	case analyzer.AzureDatabaseForPostgresql, // todo: Add database name in PostgresqlProps
+		analyzer.AzureDatabaseForMysql,
+		analyzer.AzureCacheForRedis,
+		analyzer.AzureCosmosDbForMongoDb:
+		return nil, nil
 	case analyzer.AzureServiceBus:
 		return project.ServiceBusProps{
 			Queues: s.Queues,
