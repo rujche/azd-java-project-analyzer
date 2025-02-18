@@ -56,6 +56,8 @@ func toResourceType(service analyzer.Service) (project.ResourceType, error) {
 		return project.ResourceTypeDbPostgres, nil
 	case analyzer.AzureDatabaseForMysql:
 		return project.ResourceTypeDbPostgres, nil // todo: change to mysql when azd support mysql
+	case analyzer.AzureCacheForRedis:
+		return project.ResourceTypeDbRedis, nil
 	case analyzer.AzureServiceBus:
 		return project.ResourceTypeMessagingServiceBus, nil
 	default:

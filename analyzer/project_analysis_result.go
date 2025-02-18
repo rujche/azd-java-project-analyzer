@@ -35,6 +35,12 @@ type AzureDatabaseForMysql struct {
 	DatabaseName string
 }
 
+const DefaultRedisServiceName = "redis"
+
+type AzureCacheForRedis struct {
+	// todo: Add fields like auth type
+}
+
 const DefaultServiceBusServiceName = "service-bus"
 
 type AzureServiceBus struct {
