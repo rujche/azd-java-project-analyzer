@@ -62,6 +62,8 @@ func toResourceType(service analyzer.Service) (project.ResourceType, error) {
 		return project.ResourceTypeDbMongo, nil
 	case analyzer.AzureServiceBus:
 		return project.ResourceTypeMessagingServiceBus, nil
+	case analyzer.AzureStorageAccount:
+		return project.ResourceTypeStorage, nil
 	default:
 		return "", fmt.Errorf("unknown service type: %v", service)
 	}
@@ -87,6 +89,10 @@ func toProps(service analyzer.Service) (interface{}, error) {
 	case analyzer.AzureEventHubs:
 		return project.EventHubsProps{
 			Hubs: s.Hubs,
+		}, nil
+	case analyzer.AzureStorageAccount:
+		return project.StorageProps{
+			Containers: s.Containers,
 		}, nil
 	default:
 		return "", fmt.Errorf("unknown service type when get Props: %v", service)
