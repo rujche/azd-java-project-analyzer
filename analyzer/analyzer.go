@@ -179,7 +179,7 @@ func detectServiceBus(result *ProjectAnalysisResult, applicationName string, pom
 	}
 	var queues []string
 	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-servicebus") {
-		queues = append(queues, internal.GetBindingDestinationValues(properties)...)
+		queues = internal.AppendAndDistinct(queues, internal.GetDistinctBindingDestinationValues(properties))
 	}
 	return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultServiceBusServiceName,
 		AzureServiceBus{Queues: queues})
@@ -198,7 +198,7 @@ func detectEventHubs(result *ProjectAnalysisResult, applicationName string, pom 
 	var hubs []string
 	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-eventhubs") ||
 		hasDependency(pom, "org.springframework.cloud", "spring-cloud-starter-stream-kafka") {
-		hubs = append(hubs, internal.GetBindingDestinationValues(properties)...)
+		hubs = internal.AppendAndDistinct(hubs, internal.GetDistinctBindingDestinationValues(properties))
 	}
 	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-eventhubs") {
 		var targetPropertyNames = []string{
@@ -213,8 +213,7 @@ func detectEventHubs(result *ProjectAnalysisResult, applicationName string, pom 
 				eventHubsNamePropertyMap[propertyName] = propertyValue
 			}
 		}
-		// todo: avoid duplicated values
-		hubs = append(hubs, internal.DistinctValues(eventHubsNamePropertyMap)...)
+		hubs = internal.AppendAndDistinct(hubs, internal.DistinctMapValues(eventHubsNamePropertyMap))
 	}
 	return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
 		AzureEventHubs{Hubs: hubs})
@@ -238,7 +237,7 @@ func detectStorageAccount(result *ProjectAnalysisResult, applicationName string,
 				containerNamePropertyMap[key] = value
 			}
 		}
-		containers = append(containers, internal.DistinctValues(containerNamePropertyMap)...)
+		containers = internal.AppendAndDistinct(containers, internal.DistinctMapValues(containerNamePropertyMap))
 	}
 	return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultStorageServiceName,
 		AzureStorageAccount{Containers: containers})

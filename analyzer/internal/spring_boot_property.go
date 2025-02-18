@@ -174,14 +174,29 @@ func GetBindingDestinationMap(properties map[string]string) map[string]string {
 	return result
 }
 
-func GetBindingDestinationValues(properties map[string]string) []string {
-	return DistinctValues(GetBindingDestinationMap(properties))
+func GetDistinctBindingDestinationValues(properties map[string]string) []string {
+	return DistinctMapValues(GetBindingDestinationMap(properties))
 }
 
-func DistinctValues(input map[string]string) []string {
-	valueSet := make(map[string]struct{})
+func DistinctMapValues(input map[string]string) []string {
+	valueSet := make(map[string]bool)
 	for _, value := range input {
-		valueSet[value] = struct{}{}
+		valueSet[value] = true
+	}
+	var result []string
+	for value := range valueSet {
+		result = append(result, value)
+	}
+	return result
+}
+
+func AppendAndDistinct(a []string, b []string) []string {
+	valueSet := make(map[string]bool)
+	for _, value := range a {
+		valueSet[value] = true
+	}
+	for _, value := range b {
+		valueSet[value] = true
 	}
 	var result []string
 	for value := range valueSet {
