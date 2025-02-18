@@ -227,21 +227,16 @@ func detectCosmos(result *ProjectAnalysisResult, applicationName string, pom int
 
 func detectServiceBus(result *ProjectAnalysisResult, applicationName string, pom internal.Pom,
 	properties map[string]string) error {
-	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-servicebus-jms") {
-		err := addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultServiceBusServiceName,
-			AzureServiceBus{})
-		if err != nil {
-			return err
-		}
+	if !hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-servicebus-jms") &&
+		!hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-servicebus") {
+		return nil
 	}
+	var queues []string
 	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-servicebus") {
-		err := addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultServiceBusServiceName,
-			AzureServiceBus{Queues: internal.GetBindingDestinationValues(properties)})
-		if err != nil {
-			return err
-		}
+		queues = append(queues, internal.GetBindingDestinationValues(properties)...)
 	}
-	return nil
+	return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultServiceBusServiceName,
+		AzureServiceBus{Queues: queues})
 }
 
 func hasDependency(pom internal.Pom, groupId string, artifactId string) bool {
