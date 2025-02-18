@@ -20,6 +20,10 @@ func main() {
 		return
 	}
 	cwd := flag.String("cwd", dir, "change working directory")
+	// todo: add other flags like:
+	// 1. output dir.
+	// 2. output to console.
+	// 3. log level.
 	flag.Parse()
 
 	result, err := analyzer.AnalyzeJavaProject(*cwd)
