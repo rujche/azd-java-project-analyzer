@@ -60,6 +60,8 @@ func toResourceType(service analyzer.Service) (project.ResourceType, error) {
 		return project.ResourceTypeDbRedis, nil
 	case analyzer.AzureCosmosDbForMongoDb:
 		return project.ResourceTypeDbMongo, nil
+	case analyzer.AzureCosmosDb:
+		return project.ResourceTypeDbMongo, nil // todo: change to cosmos when azd support cosmos
 	case analyzer.AzureServiceBus:
 		return project.ResourceTypeMessagingServiceBus, nil
 	case analyzer.AzureStorageAccount:
