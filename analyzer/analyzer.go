@@ -88,17 +88,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	if err = detectMysql(&result, applicationName, pom, properties); err != nil {
 		return ProjectAnalysisResult{}, err
 	}
+	if err = detectRedis(&result, applicationName, pom); err != nil {
+		return ProjectAnalysisResult{}, err
+	}
 	bindingDestinationMap := internal.GetBindingDestinationMap(properties)
 	bindingDestinationValues := internal.DistinctValues(bindingDestinationMap)
 	for _, dep := range pom.Dependencies {
-		if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-redis") ||
-			(dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-redis-reactive") {
-			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultRedisServiceName,
-				AzureCacheForRedis{})
-			if err != nil {
-				return result, err
-			}
-		} else if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb") ||
+		if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb") ||
 			(dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-mongodb-reactive") {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMongoServiceName,
 				AzureCosmosDbForMongoDb{})
@@ -215,6 +211,15 @@ func detectMysql(result *ProjectAnalysisResult, applicationName string, pom inte
 		// 3. Same to other resources like postgresql
 		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultMysqlServiceName,
 			AzureDatabaseForMysql{getDatabaseNameFromSpringDataSourceUrlProperty(properties)})
+	}
+	return nil
+}
+
+func detectRedis(result *ProjectAnalysisResult, applicationName string, pom internal.Pom) error {
+	if hasDependency(pom, "org.springframework.boot", "spring-boot-starter-data-redis") ||
+		hasDependency(pom, "org.springframework.boot", "spring-boot-starter-data-redis-reactive") {
+		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultRedisServiceName,
+			AzureCacheForRedis{})
 	}
 	return nil
 }
