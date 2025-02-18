@@ -179,6 +179,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 			if err != nil {
 				return result, err
 			}
+		} else if dep.GroupId == "org.springframework.cloud" && dep.ArtifactId == "spring-cloud-starter-stream-kafka" {
+			// todo: 1. add spring boot version related property. 2. Differentiate event hub and event hub kafka.
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultEventHubsServiceName,
+				AzureEventHubs{Hubs: bindingDestinationValues})
+			if err != nil {
+				return result, err
+			}
 		}
 		// todo: support other resource types.
 	}
