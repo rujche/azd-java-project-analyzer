@@ -94,16 +94,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	if err = detectMongo(&result, applicationName, pom); err != nil {
 		return ProjectAnalysisResult{}, err
 	}
+	if err = detectCosmos(&result, applicationName, pom); err != nil {
+		return ProjectAnalysisResult{}, err
+	}
 	bindingDestinationMap := internal.GetBindingDestinationMap(properties)
 	bindingDestinationValues := internal.DistinctValues(bindingDestinationMap)
 	for _, dep := range pom.Dependencies {
-		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-data-cosmos" {
-			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultCosmosServiceName,
-				AzureCosmosDb{})
-			if err != nil {
-				return result, err
-			}
-		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-servicebus-jms" {
+		if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-servicebus-jms" {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultServiceBusServiceName,
 				AzureServiceBus{})
 			if err != nil {
@@ -225,6 +222,14 @@ func detectMongo(result *ProjectAnalysisResult, applicationName string, pom inte
 		hasDependency(pom, "org.springframework.boot", "spring-boot-starter-data-mongodb-reactive") {
 		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultMongoServiceName,
 			AzureCosmosDbForMongoDb{})
+	}
+	return nil
+}
+
+func detectCosmos(result *ProjectAnalysisResult, applicationName string, pom internal.Pom) error {
+	if hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-data-cosmos") {
+		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultCosmosServiceName,
+			AzureCosmosDb{})
 	}
 	return nil
 }
