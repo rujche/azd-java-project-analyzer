@@ -84,6 +84,10 @@ func toProps(service analyzer.Service) (interface{}, error) {
 			Queues: s.Queues,
 			Topics: s.Topics,
 		}, nil
+	case analyzer.AzureEventHubs:
+		return project.EventHubsProps{
+			Hubs: s.Hubs,
+		}, nil
 	default:
 		return "", fmt.Errorf("unknown service type when get Props: %v", service)
 	}

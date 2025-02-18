@@ -141,6 +141,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 			if err != nil {
 				return result, err
 			}
+		} else if dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-stream-binder-eventhubs" {
+			// todo: merge queues and topics if multiple dependencies (or apps) use one Azure Event Hubs.
+			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultEventHubsServiceName,
+				AzureEventHubs{Hubs: bindingDestinationValues})
+			if err != nil {
+				return result, err
+			}
 		}
 		// todo: support other resource types.
 	}

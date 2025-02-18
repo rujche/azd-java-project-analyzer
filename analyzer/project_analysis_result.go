@@ -60,6 +60,12 @@ type AzureServiceBus struct {
 	Topics []string
 }
 
+const DefaultEventHubsServiceName = "event-hubs"
+
+type AzureEventHubs struct {
+	Hubs []string
+}
+
 func addApplicationToResult(result *ProjectAnalysisResult, applicationName string, application Application) error {
 	if _, ok := result.Applications[applicationName]; ok {
 		return fmt.Errorf("applicationName %s already exists", applicationName)
