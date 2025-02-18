@@ -64,6 +64,8 @@ func toResourceType(service analyzer.Service) (project.ResourceType, error) {
 		return project.ResourceTypeDbMongo, nil // todo: change to cosmos when azd support cosmos
 	case analyzer.AzureServiceBus:
 		return project.ResourceTypeMessagingServiceBus, nil
+	case analyzer.AzureEventHubs:
+		return project.ResourceTypeMessagingEventHubs, nil
 	case analyzer.AzureStorageAccount:
 		return project.ResourceTypeStorage, nil
 	default:
