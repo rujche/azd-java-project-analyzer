@@ -82,6 +82,9 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	}
 	// 3. Add Application related backing Service
 	properties := internal.ReadProperties(filepath.Dir(pomFileAbsolutePath))
+	if err = detectPostgresql(&result, applicationName, pom, properties); err != nil {
+		return ProjectAnalysisResult{}, err
+	}
 	databaseName := ""
 	databaseNamePropertyValue, ok := properties["spring.datasource.url"]
 	if ok {
@@ -98,13 +101,6 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 			// 3. Same to other resources like postgresql
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMysqlServiceName,
 				AzureDatabaseForMysql{databaseName})
-			if err != nil {
-				return result, err
-			}
-		} else if (dep.GroupId == "org.postgresql" && dep.ArtifactId == "postgresql") ||
-			(dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-jdbc-postgresql") {
-			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultPostgresqlServiceName,
-				AzureDatabaseForPostgresql{databaseName})
 			if err != nil {
 				return result, err
 			}
@@ -209,4 +205,33 @@ func isSpringBootRunnableProject(pom internal.Pom) bool {
 		}
 	}
 	return false
+}
+
+func detectPostgresql(result *ProjectAnalysisResult, applicationName string, pom internal.Pom,
+	properties map[string]string) error {
+	if hasDependency(pom, "org.postgresql", "postgresql") ||
+		hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-jdbc-postgresql") {
+
+		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultPostgresqlServiceName,
+			AzureDatabaseForPostgresql{getDatabaseNameFromSpringDataSourceUrlProperty(properties)})
+	}
+	return nil
+}
+
+func hasDependency(pom internal.Pom, groupId string, artifactId string) bool {
+	for _, dep := range pom.Dependencies {
+		if dep.GroupId == groupId && dep.ArtifactId == artifactId {
+			return true
+		}
+	}
+	return false
+}
+
+func getDatabaseNameFromSpringDataSourceUrlProperty(properties map[string]string) string {
+	databaseName := ""
+	databaseNamePropertyValue, ok := properties["spring.datasource.url"]
+	if ok {
+		databaseName = internal.GetDatabaseName(databaseNamePropertyValue)
+	}
+	return databaseName
 }
