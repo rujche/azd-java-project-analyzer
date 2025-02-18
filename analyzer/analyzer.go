@@ -103,6 +103,9 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	if err = detectEventHubs(&result, applicationName, pom, properties); err != nil {
 		return ProjectAnalysisResult{}, err
 	}
+	if err = detectStorageAccount(&result, applicationName, pom, properties); err != nil {
+		return ProjectAnalysisResult{}, err
+	}
 	return result, nil
 }
 
@@ -122,7 +125,6 @@ func detectPostgresql(result *ProjectAnalysisResult, applicationName string, pom
 	properties map[string]string) error {
 	if hasDependency(pom, "org.postgresql", "postgresql") ||
 		hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-jdbc-postgresql") {
-
 		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultPostgresqlServiceName,
 			AzureDatabaseForPostgresql{getDatabaseNameFromSpringDataSourceUrlProperty(properties)})
 	}
@@ -211,10 +213,35 @@ func detectEventHubs(result *ProjectAnalysisResult, applicationName string, pom 
 				eventHubsNamePropertyMap[propertyName] = propertyValue
 			}
 		}
+		// todo: avoid duplicated values
 		hubs = append(hubs, internal.DistinctValues(eventHubsNamePropertyMap)...)
 	}
 	return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultEventHubsServiceName,
 		AzureEventHubs{Hubs: hubs})
+}
+
+func detectStorageAccount(result *ProjectAnalysisResult, applicationName string, pom internal.Pom,
+	properties map[string]string) error {
+	if !hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-eventhubs") &&
+		!hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-integration-eventhubs") &&
+		!hasDependency(pom, "com.azure.spring", "spring-messaging-azure-eventhubs") {
+		return nil
+	}
+	var containers []string
+	if (hasDependency(pom, "com.azure.spring", "spring-cloud-azure-stream-binder-eventhubs") &&
+		containsInKeywordInBindingName(properties)) ||
+		hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-integration-eventhubs") ||
+		hasDependency(pom, "com.azure.spring", "spring-messaging-azure-eventhubs") {
+		containerNamePropertyMap := make(map[string]string)
+		for key, value := range properties {
+			if strings.HasSuffix(key, "spring.cloud.azure.eventhubs.processor.checkpoint-store.container-name") {
+				containerNamePropertyMap[key] = value
+			}
+		}
+		containers = append(containers, internal.DistinctValues(containerNamePropertyMap)...)
+	}
+	return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultStorageServiceName,
+		AzureStorageAccount{Containers: containers})
 }
 
 func hasDependency(pom internal.Pom, groupId string, artifactId string) bool {
@@ -233,4 +260,14 @@ func getDatabaseNameFromSpringDataSourceUrlProperty(properties map[string]string
 		databaseName = internal.GetDatabaseName(databaseNamePropertyValue)
 	}
 	return databaseName
+}
+
+func containsInKeywordInBindingName(properties map[string]string) bool {
+	bindingDestinations := internal.GetBindingDestinationMap(properties)
+	for bindingName := range bindingDestinations {
+		if strings.Contains(bindingName, "-in-") { // Example: consume-in-0
+			return true
+		}
+	}
+	return false
 }
