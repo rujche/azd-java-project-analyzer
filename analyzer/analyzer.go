@@ -85,26 +85,13 @@ func analyzePomProject(projectRootPath string, pomFileAbsolutePath string) (Proj
 	if err = detectPostgresql(&result, applicationName, pom, properties); err != nil {
 		return ProjectAnalysisResult{}, err
 	}
-	databaseName := ""
-	databaseNamePropertyValue, ok := properties["spring.datasource.url"]
-	if ok {
-		databaseName = internal.GetDatabaseName(databaseNamePropertyValue)
+	if err = detectMysql(&result, applicationName, pom, properties); err != nil {
+		return ProjectAnalysisResult{}, err
 	}
 	bindingDestinationMap := internal.GetBindingDestinationMap(properties)
 	bindingDestinationValues := internal.DistinctValues(bindingDestinationMap)
 	for _, dep := range pom.Dependencies {
-		if (dep.GroupId == "com.mysql" && dep.ArtifactId == "mysql-connector-j") ||
-			(dep.GroupId == "com.azure.spring" && dep.ArtifactId == "spring-cloud-azure-starter-jdbc-mysql") {
-			// todo:
-			// 1. support multiple container app use multiple mysql
-			// 2. Support multiple container app use one mysql
-			// 3. Same to other resources like postgresql
-			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultMysqlServiceName,
-				AzureDatabaseForMysql{databaseName})
-			if err != nil {
-				return result, err
-			}
-		} else if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-redis") ||
+		if (dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-redis") ||
 			(dep.GroupId == "org.springframework.boot" && dep.ArtifactId == "spring-boot-starter-data-redis-reactive") {
 			err = addApplicationRelatedBackingServiceToResult(&result, applicationName, DefaultRedisServiceName,
 				AzureCacheForRedis{})
@@ -214,6 +201,20 @@ func detectPostgresql(result *ProjectAnalysisResult, applicationName string, pom
 
 		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultPostgresqlServiceName,
 			AzureDatabaseForPostgresql{getDatabaseNameFromSpringDataSourceUrlProperty(properties)})
+	}
+	return nil
+}
+
+func detectMysql(result *ProjectAnalysisResult, applicationName string, pom internal.Pom,
+	properties map[string]string) error {
+	if hasDependency(pom, "com.mysql", "mysql-connector-j") ||
+		hasDependency(pom, "com.azure.spring", "spring-cloud-azure-starter-jdbc-mysql") {
+		// todo:
+		// 1. support multiple container app use multiple mysql
+		// 2. Support multiple container app use one mysql
+		// 3. Same to other resources like postgresql
+		return addApplicationRelatedBackingServiceToResult(result, applicationName, DefaultMysqlServiceName,
+			AzureDatabaseForMysql{getDatabaseNameFromSpringDataSourceUrlProperty(properties)})
 	}
 	return nil
 }
