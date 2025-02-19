@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -84,7 +85,7 @@ func CreateEffectivePom(pomPath string) (Pom, error) {
 	// todo:
 	// 1. Use maven wrapper if exists.
 	// 2. Download maven if "mvn" command not exist in path.
-	cmd := exec.Command("mvn", "help:effective-pom", "-f", pomPath)
+	cmd := exec.Command("mvn", "help:effective-pom", "-f", pomPath, "-pl", filepath.Base(pomPath))
 	output, err := cmd.Output()
 	if err != nil {
 		return Pom{}, err
@@ -104,19 +105,20 @@ var projectEnd = regexp.MustCompile(`^\s*</project>\s*$`)
 func getEffectivePomStringFromConsoleOutput(consoleOutput string) (string, error) {
 	var builder strings.Builder
 	scanner := bufio.NewScanner(strings.NewReader(consoleOutput))
-	inProject := false
-
+	projectStarted := false
+	projectEnded := false
 	for scanner.Scan() {
 		line := scanner.Text()
 		if projectStart.MatchString(line) {
-			inProject = true
-			builder.Reset() // for a pom which contains submodule, the effective pom for root pom appears at last.
+			projectStarted = true
 		} else if projectEnd.MatchString(line) {
-			builder.WriteString(line)
-			inProject = false
+			projectEnded = true
 		}
-		if inProject {
+		if projectStarted {
 			builder.WriteString(line)
+		}
+		if projectEnded {
+			break
 		}
 	}
 	if err := scanner.Err(); err != nil {

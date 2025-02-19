@@ -139,6 +139,16 @@ func addApplicationRelatedBackingServiceToResult(result *ProjectAnalysisResult, 
 
 func mergeProjectAnalysisResult(result1 ProjectAnalysisResult, result2 ProjectAnalysisResult) (ProjectAnalysisResult,
 	error) {
+	if result1.Name != result2.Name {
+		// need merge name
+		if result1.Name != "" && result2.Name != "" {
+			return ProjectAnalysisResult{}, fmt.Errorf("result1.Name = %s and result2.Name = %s, can't merge",
+				result1.Name, result2.Name)
+		}
+		if result1.Name == "" {
+			result1.Name = result2.Name
+		}
+	}
 	// 1. Add application
 	for applicationName, application := range result2.Applications {
 		err := addApplicationToResult(&result1, applicationName, application)
