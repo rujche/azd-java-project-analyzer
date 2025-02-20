@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/azure/azure-dev/cli/azd/pkg/osutil"
 	"github.com/braydonk/yaml"
 )
 
@@ -30,7 +29,7 @@ func ReadProperties(projectPath string) map[string]string {
 }
 
 func readPropertiesInYamlFile(yamlFilePath string, result map[string]string) {
-	if !osutil.FileExists(yamlFilePath) {
+	if !fileExists(yamlFilePath) {
 		return
 	}
 	data, err := os.ReadFile(yamlFilePath)
@@ -91,7 +90,7 @@ func parseYAML(prefix string, node *yaml.Node, result map[string]string) {
 }
 
 func readPropertiesInPropertiesFile(propertiesFilePath string, result map[string]string) {
-	if !osutil.FileExists(propertiesFilePath) {
+	if !fileExists(propertiesFilePath) {
 		return
 	}
 	file, err := os.Open(propertiesFilePath)
@@ -203,4 +202,9 @@ func AppendAndDistinct(a []string, b []string) []string {
 		result = append(result, value)
 	}
 	return result
+}
+
+func fileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return !os.IsNotExist(err)
 }

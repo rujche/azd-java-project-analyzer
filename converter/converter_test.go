@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"ajpa/analyzer"
+	"ajpa/converter/azd"
 
-	"github.com/azure/azure-dev/cli/azd/pkg/project"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +13,7 @@ func TestProjectAnalysisResultToAzdProjectConfig(t *testing.T) {
 	tests := []struct {
 		name     string
 		result   analyzer.ProjectAnalysisResult
-		expected project.ProjectConfig
+		expected azd.ProjectConfig
 	}{
 		{
 			name: "one dependency: postgresql",
@@ -35,31 +35,28 @@ func TestProjectAnalysisResultToAzdProjectConfig(t *testing.T) {
 					},
 				},
 			},
-			expected: project.ProjectConfig{
+			expected: azd.ProjectConfig{
 				Name: "app-one-sample",
-				Services: map[string]*project.ServiceConfig{
+				Services: map[string]*azd.ServiceConfig{
 					"app-one": {
-						Project:      nil, // will be updated in test
 						Name:         "app-one",
-						Language:     project.ServiceLanguageJava,
+						Language:     azd.ServiceLanguageJava,
 						RelativePath: "app-one",
-						Host:         project.ContainerAppTarget,
+						Host:         azd.ContainerAppTarget,
 					},
 				},
-				Resources: map[string]*project.ResourceConfig{
+				Resources: map[string]*azd.ResourceConfig{
 					"app-one": {
-						Project: nil, // will be updated in test
-						Type:    project.ResourceTypeHostContainerApp,
-						Name:    "app-one",
-						Uses:    []string{analyzer.DefaultPostgresqlServiceName},
-						Props: project.ContainerAppProps{
+						Type: azd.ResourceTypeHostContainerApp,
+						Name: "app-one",
+						Uses: []string{analyzer.DefaultPostgresqlServiceName},
+						Props: azd.ContainerAppProps{
 							Port: 8080,
 						},
 					},
 					analyzer.DefaultPostgresqlServiceName: {
-						Project: nil, // will be updated in test
-						Type:    project.ResourceTypeDbPostgres,
-						Name:    analyzer.DefaultPostgresqlServiceName,
+						Type: azd.ResourceTypeDbPostgres,
+						Name: analyzer.DefaultPostgresqlServiceName,
 					},
 				},
 			},
@@ -67,12 +64,6 @@ func TestProjectAnalysisResultToAzdProjectConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			for key := range tt.expected.Services {
-				tt.expected.Services[key].Project = &tt.expected
-			}
-			for key := range tt.expected.Resources {
-				tt.expected.Resources[key].Project = &tt.expected
-			}
 			config, err := ProjectAnalysisResultToAzdProjectConfig(tt.result)
 			if err != nil {
 				t.Fatalf("ProjectAnalysisResultToAzdProjectConfig failed: %v", err)

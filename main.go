@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -9,8 +8,7 @@ import (
 
 	"ajpa/analyzer"
 	"ajpa/converter"
-
-	"github.com/azure/azure-dev/cli/azd/pkg/project"
+	"ajpa/converter/azd"
 )
 
 func main() {
@@ -37,7 +35,7 @@ func main() {
 		return
 	}
 	path := filepath.Join(*cwd, "azure.yaml")
-	err = project.Save(context.TODO(), &config, path)
+	err = azd.Save(&config, path)
 	if err != nil {
 		fmt.Println(err)
 		return
